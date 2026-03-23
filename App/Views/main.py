@@ -1,44 +1,57 @@
-from App.Models.cliente import PessoaFisica
-from App.Models.conta import ContaCorrente
-from App.Models.transacao import Deposito, Saque
 import tkinter as tk
+from tkinter import messagebox
 
+class View:
+    def __init__(self, root, comando_salvar):
+        self.root = root
+        self.root.title("Sistema Bancário")
+        self.root.geometry("350x300")
+        
+        self.comando_salvar = comando_salvar
 
-cliente = PessoaFisica("123.456.789-00", "Pedro", "25/09/2006", "Rua X, 123")
+        tk.Label(root, text="=== CADASTRO DE CONTA ===", font=("Arial", 12, "bold")).pack(pady=10)
 
+        tk.Label(root, text="Nome do Cliente:").pack()
+        self.entry_nome = tk.Entry(root, width=30)
+        self.entry_nome.pack(pady=5)
 
-conta = ContaCorrente(numero=1, cliente=cliente)
-cliente.adicionar_conta(conta)
+        tk.Label(root, text="CPF do Cliente:").pack()
+        self.entry_cpf = tk.Entry(root, width=30)
+        self.entry_cpf.pack(pady=5)
 
+        tk.Label(root, text="Saldo Inicial (R$):").pack()
+        self.entry_saldo = tk.Entry(root, width=30)
+        self.entry_saldo.pack(pady=5)
 
-deposito = Deposito(1000.0)
-cliente.realizar_transacao(conta, deposito)
+        tk.Button(root, text="Criar Conta", command=self.enviar_dados, bg="lightblue").pack(pady=15)
 
-saque = Saque(200.0)
-cliente.realizar_transacao(conta, saque)
+    def enviar_dados(self):
+        nome = self.entry_nome.get()
+        cpf = self.entry_cpf.get()
+        saldo_texto = self.entry_saldo.get()
 
+        if not nome or not cpf:
+            messagebox.showerror("Erro", "Nome e CPF são obrigatórios!")
+            return
 
-print(f"Cliente: {cliente.nome}")
-print(f"Saldo atual: R$ {conta.saldo:.2f}")
-print("Histórico:")
-for t in conta.historico.transacoes:
-    print(f"- {t['tipo']}: R$ {t['valor']}")
+        try:
+            saldo_inicial = float(saldo_texto) if saldo_texto else 0.0
+        except ValueError:
+            messagebox.showwarning("Aviso", "Valor inválido! O saldo inicial será R$ 0.00.")
+            saldo_inicial = 0.0
+            
+        self.comando_salvar(nome, cpf, saldo_inicial)
 
-#Criação janela
-def abrir_janela():
-    janela_criarconta = tk.Toplevel()
-    janela_criarconta.title("Sistema Bancário")
-    janela_criarconta.geometry("300x300")
-    label_nome = tk.Label(janela_criarconta, text = "Nome")
-    label_nome.grid(row = 0, column = 0 )
-    botao_voltar = tk.Button(janela_criarconta, text = 'Enviar informações', command = janela_criarconta.destroy)
-    botao_voltar.grid(row=1, column=0)
-
-janela_inicial = tk.Tk()
-janela_inicial.title("Sistema Bancário")
-janela_inicial.geometry("300x300")
-botao = tk.Button(janela_inicial, text = 'Criar conta', command = abrir_janela)
-botao.grid(row = 0, column = 0)
-
-
-janela_inicial.mainloop()
+    def exibir_dados_conta(self, conta):
+        mensagem = (
+            f"Conta criada com sucesso!\n\n"
+            f"Número da Conta: {conta.numero}\n"
+            f"Cliente: {conta.cliente.nome}\n"
+            f"CPF: {conta.cliente.cpf}\n"
+            f"Saldo Atual: R$ {conta.saldo:.2f}"
+        )
+        messagebox.showinfo("Sucesso", mensagem)
+        
+        self.entry_nome.delete(0, tk.END)
+        self.entry_cpf.delete(0, tk.END)
+        self.entry_saldo.delete(0, tk.END)
