@@ -9,7 +9,7 @@ class View:
         
         self.comando_salvar = comando_salvar
 
-        tk.Label(root, text="=== CADASTRO DE CONTA ===", font=("Arial", 12, "bold")).pack(pady=10)
+        tk.Label(root, text="CADASTRO DE CONTA", font=("Arial", 12, "bold")).pack(pady=10)
 
         tk.Label(root, text="Nome do Cliente:").pack()
         self.entry_nome = tk.Entry(root, width=30)
